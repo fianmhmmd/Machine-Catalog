@@ -21,6 +21,9 @@ func main() {
 	// Connect to database
 	database.ConnectDB()
 
+	// Initialize MinIO
+	utils.InitMinio()
+
 	app := fiber.New()
 
 	// Middleware
