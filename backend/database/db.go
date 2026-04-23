@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/fianmhmmd/machine-catalog/backend/models"
+	"github.com/fianmhmmd/machine-catalog/backend/utils"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -47,10 +48,11 @@ func seedAdmin(db *gorm.DB) {
 	var count int64
 	db.Model(&models.Admin{}).Count(&count)
 	if count == 0 {
+		hashedPassword, _ := utils.HashPassword("password")
 		admin := models.Admin{
 			Name:         "Admin",
 			Email:        "admin@example.com",
-			PasswordHash: "$2a$10$8Wk6p5Y.7Z1w.o9z.7w5.uO1.z7z.z7z.z7z.z7z.z7z.z7z", // password: password (placeholder)
+			PasswordHash: hashedPassword,
 		}
 		db.Create(&admin)
 		log.Println("Default admin seeded: admin@example.com / password")
