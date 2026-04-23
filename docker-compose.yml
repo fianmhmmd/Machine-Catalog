@@ -1,0 +1,73 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: machine_catalog_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-machine_catalog}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  minio:
+    image: minio/minio
+    container_name: machine_catalog_minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-password}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: machine_catalog_api
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: db
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-password}
+      DB_NAME: ${DB_NAME:-machine_catalog}
+      DB_PORT: 5432
+      PORT: 8080
+      ALLOWED_ORIGINS: "*"
+    depends_on:
+      - db
+      - minio
+
+  web:
+    build:
+      context: ./frontend-public
+      dockerfile: Dockerfile
+    container_name: machine_catalog_web
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://api:8080/api/v1
+    depends_on:
+      - api
+
+  admin:
+    build:
+      context: ./frontend-admin
+      dockerfile: Dockerfile
+    container_name: machine_catalog_admin
+    ports:
+      - "3001:80"
+    environment:
+      VITE_API_URL: http://api:8080/api/v1
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  minio_data:
