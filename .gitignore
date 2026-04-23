@@ -1,0 +1,30 @@
+# IDE
+.vscode/
+.idea/
+
+# Node
+node_modules/
+dist/
+.next/
+out/
+build/
+*.log
+
+# Go
+backend/main
+backend/.env
+bin/
+
+# Docker
+.docker_data/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
